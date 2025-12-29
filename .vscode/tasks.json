@@ -12,7 +12,7 @@
             "label": "test contracts",
             "group": "test",
             "type": "shell",
-            "command": "clarinet test"
+            "command": "npm test"
         }
     ]
 }

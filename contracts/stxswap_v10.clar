@@ -8,6 +8,7 @@
 (define-constant ERR_ZERO_AMOUNT (err u1004))
 (define-constant ERR_HASH_ALREADY_EXISTS (err u1005))
 (define-constant ERR_WRONG_AMOUNT (err u1006))
+(define-constant ERR_STX_TRANSFER_FAILED (err u1007))
 
 ;; map that holds all swaps
 (define-map swaps
@@ -36,7 +37,7 @@
     (asserts! (is-eq (map-get? swaps { hash: preimageHash }) none)
       ERR_HASH_ALREADY_EXISTS
     )
-    (unwrap-panic (stx-transfer? amount tx-sender current-contract))
+    (try! (stx-transfer? amount tx-sender current-contract))
     (map-set swaps { hash: preimageHash } {
       amount: amount,
       timelock: timelock,
@@ -85,7 +86,7 @@
       ERR_REFUND_BLOCKHEIGHT_NOT_REACHED
     )
     (asserts! (is-eq claimer (get initiator swap)) ERR_INVALID_CLAIMER)
-    (map-delete swaps { hash: preimageHash })
+    (asserts! (map-delete swaps { hash: preimageHash }) ERR_SWAP_NOT_FOUND)
     (try! (as-contract? ((with-stx amount))
       (try! (stx-transfer? amount current-contract claimer))
     ))
